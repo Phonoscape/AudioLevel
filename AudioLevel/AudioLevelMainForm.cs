@@ -15,6 +15,15 @@ namespace AudioLevel
         private MMDevice? mMDevice_out = null;
         private MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
 
+        private MMDeviceCollection mMDeviceCollection_in;
+        private MMDeviceCollection mMDeviceCollection_out;
+        private List<string> mMDeviceCollection_in_ids = new List<string>();
+        private List<string> mMDeviceCollection_out_ids = new List<string>();
+
+        private bool isCaptureChangeByAuto = false;
+        private bool isRenderChangeByAuto = false;
+        private bool isInit = true;
+
         public AudioLevelForm()
         {
             InitializeComponent();
@@ -22,23 +31,19 @@ namespace AudioLevel
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            MMDeviceCollection mMDeviceCollection_in = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
-            MMDeviceCollection mMDeviceCollection_out = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
-
-            foreach (var device in mMDeviceCollection_in)
-            {
-                Debug.WriteLine($"Device: {device.FriendlyName}, ID: {device.ID}");
-            }
+            SetCaptureComboBox();
+            SetRenderComboBox();
 
             client = new MMNotificationClient();
             client.DefaultDeviceChanged += (s, a) =>
             {
                 Debug.WriteLine($"Default Device Changed: {a.flow}, {a.role}, {a.defaultDeviceId}");
-                                
+
                 if (a.flow == DataFlow.Capture)
                 {
                     if (capture_capture_in != null)
                     {
+                        isCaptureChangeByAuto = true;
                         StopCapture();
 
                         SetDefaultAudioEndpointCapture();
@@ -53,6 +58,7 @@ namespace AudioLevel
                 {
                     if (capture_render_out != null)
                     {
+                        isRenderChangeByAuto = true;
                         StopRender();
 
                         SetDefaultAudioEndpointRender();
@@ -74,6 +80,8 @@ namespace AudioLevel
 
             StartCapture();
             StartRender();
+
+            isInit = false;
         }
 
         private void SetDefaultAudioEndpointCapture()
@@ -91,7 +99,7 @@ namespace AudioLevel
         }
 
         private void SetDefaultAudioEndpointRender()
-        { 
+        {
             try
             {
                 mMDevice_out = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Communications);
@@ -103,6 +111,35 @@ namespace AudioLevel
                 return;
             }
         }
+
+        private void SetAudioEndpointCapture(string id)
+        {
+            try
+            {
+                mMDevice_in = enumerator.GetDevice(id);
+                SetCaptureLabel(mMDevice_in.FriendlyName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error getting default audio endpoint: {ex.Message}");
+                return;
+            }
+        }
+
+        private void SetAudioEndpointRender(string id)
+        {
+            try
+            {
+                mMDevice_out = enumerator.GetDevice(id);
+                SetRenderLabel(mMDevice_out.FriendlyName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error getting default audio endpoint: {ex.Message}");
+                return;
+            }
+        }
+
 
         private void SetCapture()
         {
@@ -235,31 +272,55 @@ namespace AudioLevel
 
         private void SetCaptureLabel(string str)
         {
-            if (label1.InvokeRequired)
+            if (captureLabel1.InvokeRequired)
             {
-                label1.Invoke(new Action(() =>
+                captureLabel1.Invoke(new Action(() =>
                 {
-                    SetCaptureLabel(str);
+                    captureLabel1.Text = str;
                 }));
             }
             else
             {
-                label1.Text = str;
+                captureLabel1.Text = str;
+            }
+
+            if (captureComboBox.InvokeRequired)
+            {
+                captureComboBox.Invoke(new Action(() =>
+                {
+                    SelectCaptureDeviceByName(mMDevice_in.FriendlyName);
+                }));
+            }
+            else
+            {
+                SelectCaptureDeviceByName(mMDevice_in.FriendlyName);
             }
         }
 
         private void SetRenderLabel(string str)
         {
-            if (label2.InvokeRequired)
+            if (renderLabel2.InvokeRequired)
             {
-                label2.Invoke(new Action(() =>
+                renderLabel2.Invoke(new Action(() =>
                 {
-                    SetRenderLabel(str);
+                    renderLabel2.Text = str;
                 }));
             }
             else
             {
-                label2.Text = str;
+                renderLabel2.Text = str;
+            }
+
+            if (renderComboBox.InvokeRequired)
+            {
+                renderComboBox.Invoke(new Action(() =>
+                {
+                    SelectRenderDeviceByName(mMDevice_out.FriendlyName);
+                }));
+            }
+            else
+            {
+                SelectRenderDeviceByName(mMDevice_out.FriendlyName);
             }
         }
 
@@ -301,6 +362,116 @@ namespace AudioLevel
             StopRender();
         }
 
+        private new void MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                contextMenuStrip1.Show(this, e.Location);
+            }
+        }
+
+        private void TopView_ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var item = sender as ToolStripMenuItem;
+            if (item != null)
+            {
+                if (item.Checked)
+                {
+                    item.Checked = false;
+                    this.TopMost = false;
+                }
+                else
+                {
+                    item.Checked = true;
+                    this.TopMost = true;
+                }
+            }
+        }
+
+        private void SetCaptureComboBox()
+        {
+            mMDeviceCollection_in_ids.Clear();
+            mMDeviceCollection_in = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
+
+            foreach (var device in mMDeviceCollection_in)
+            {
+                Debug.WriteLine($"Device: {device.FriendlyName}, ID: {device.ID}");
+                var id = captureComboBox.Items.Add(device.FriendlyName);
+                mMDeviceCollection_in_ids.Add(device.ID);
+            }
+        }
+
+        private void SetRenderComboBox()
+        {
+            mMDeviceCollection_out_ids.Clear();
+            mMDeviceCollection_out = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+
+            foreach (var device in mMDeviceCollection_out)
+            {
+                Debug.WriteLine($"Device: {device.FriendlyName}, ID: {device.ID}");
+                var id = renderComboBox.Items.Add(device.FriendlyName);
+                mMDeviceCollection_out_ids.Add(device.ID);
+            }
+        }
+
+        private void SelectCaptureDeviceByName(string name)
+        {
+            var id = captureComboBox.Items.IndexOf(name);
+            if (id != -1)
+            {
+                captureComboBox.SelectedIndex = id;
+            }
+        }
+
+        private void SelectRenderDeviceByName(string name)
+        {
+            var id = renderComboBox.Items.IndexOf(name);
+            if (id != -1)
+            {
+                renderComboBox.SelectedIndex = id;
+            }
+        }
+
+        private void captureComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!isCaptureChangeByAuto && !isInit)
+            {
+
+                if (captureComboBox.SelectedItem != null)
+                {
+                    string selectedDevice = captureComboBox.SelectedItem.ToString();
+                    Debug.WriteLine($"Selected Capture Device: {selectedDevice}");
+                    StopCapture();
+                    SetAudioEndpointCapture(mMDeviceCollection_in_ids[captureComboBox.SelectedIndex]);
+                    SetCapture();
+                    StartCapture();
+                    SetCaptureLabel(mMDevice_in.FriendlyName);
+                    SetCaptureBar(0);
+                }
+            }
+            isCaptureChangeByAuto = false;
+        }
+
+        private void renderComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!isRenderChangeByAuto && !isInit)
+            {
+                if (renderComboBox.SelectedItem != null)
+                {
+                    string selectedDevice = renderComboBox.SelectedItem.ToString();
+                    Debug.WriteLine($"Selected Render Device: {selectedDevice}");
+                    StopRender();
+                    SetAudioEndpointRender(mMDeviceCollection_out_ids[renderComboBox.SelectedIndex]);
+                    SetRender();
+                    StartRender();
+                    SetRenderLabel(mMDevice_out.FriendlyName);
+                    SetRenderBar(0);
+                }
+            }
+            isRenderChangeByAuto = false;
+        }
+
+
         // https://gist.github.com/RupertAvery/b1a5297d99f498e44b534b8a5190d9d3
         public class DefaultDeviceChangedEventArgs
         {
@@ -334,7 +505,7 @@ namespace AudioLevel
                 DefaultDeviceChanged.Invoke(this, new DefaultDeviceChangedEventArgs() { flow = flow, role = role, defaultDeviceId = defaultDeviceId });
             }
 
-        public void OnPropertyValueChanged(string pwstrDeviceId, PropertyKey key)
+            public void OnPropertyValueChanged(string pwstrDeviceId, PropertyKey key)
             {
             }
         }
