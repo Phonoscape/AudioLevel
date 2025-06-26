@@ -47,9 +47,10 @@
             // captureLabel1
             // 
             captureLabel1.AutoSize = true;
-            captureLabel1.Location = new Point(34, 12);
+            captureLabel1.Location = new Point(49, 20);
+            captureLabel1.Margin = new Padding(4, 0, 4, 0);
             captureLabel1.Name = "captureLabel1";
-            captureLabel1.Size = new Size(35, 15);
+            captureLabel1.Size = new Size(54, 25);
             captureLabel1.TabIndex = 1;
             captureLabel1.Text = "Input";
             captureLabel1.MouseDown += MouseDown;
@@ -57,43 +58,48 @@
             // renderLabel2
             // 
             renderLabel2.AutoSize = true;
-            renderLabel2.Location = new Point(34, 65);
+            renderLabel2.Location = new Point(49, 108);
+            renderLabel2.Margin = new Padding(4, 0, 4, 0);
             renderLabel2.Name = "renderLabel2";
-            renderLabel2.Size = new Size(45, 15);
+            renderLabel2.Size = new Size(69, 25);
             renderLabel2.TabIndex = 3;
             renderLabel2.Text = "Output";
             renderLabel2.MouseDown += MouseDown;
             // 
             // progressBar1
             // 
-            progressBar1.Location = new Point(12, 30);
+            progressBar1.Location = new Point(17, 50);
+            progressBar1.Margin = new Padding(4, 5, 4, 5);
             progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(275, 23);
+            progressBar1.Size = new Size(393, 38);
             progressBar1.TabIndex = 4;
             progressBar1.MouseDown += MouseDown;
             // 
             // progressBar2
             // 
-            progressBar2.Location = new Point(12, 83);
+            progressBar2.Location = new Point(17, 138);
+            progressBar2.Margin = new Padding(4, 5, 4, 5);
             progressBar2.Name = "progressBar2";
-            progressBar2.Size = new Size(275, 23);
+            progressBar2.Size = new Size(393, 38);
             progressBar2.TabIndex = 4;
             progressBar2.MouseDown += MouseDown;
             // 
             // pictureBox1
             // 
-            pictureBox1.Location = new Point(12, 11);
+            pictureBox1.Location = new Point(17, 18);
+            pictureBox1.Margin = new Padding(4, 5, 4, 5);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(16, 16);
+            pictureBox1.Size = new Size(23, 27);
             pictureBox1.TabIndex = 5;
             pictureBox1.TabStop = false;
             pictureBox1.MouseDown += MouseDown;
             // 
             // pictureBox2
             // 
-            pictureBox2.Location = new Point(12, 64);
+            pictureBox2.Location = new Point(17, 107);
+            pictureBox2.Margin = new Padding(4, 5, 4, 5);
             pictureBox2.Name = "pictureBox2";
-            pictureBox2.Size = new Size(16, 16);
+            pictureBox2.Size = new Size(23, 27);
             pictureBox2.TabIndex = 6;
             pictureBox2.TabStop = false;
             pictureBox2.MouseDown += MouseDown;
@@ -102,23 +108,26 @@
             // 
             renderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             renderComboBox.FormattingEnabled = true;
-            renderComboBox.Location = new Point(34, 57);
+            renderComboBox.Location = new Point(49, 100);
+            renderComboBox.Margin = new Padding(4, 5, 4, 5);
             renderComboBox.Name = "renderComboBox";
-            renderComboBox.Size = new Size(253, 23);
+            renderComboBox.Size = new Size(360, 33);
             renderComboBox.TabIndex = 7;
+            renderComboBox.SelectedIndexChanged += renderComboBox_SelectedIndexChanged;
             renderComboBox.MouseDown += MouseDown;
             // 
             // contextMenuStrip1
             // 
+            contextMenuStrip1.ImageScalingSize = new Size(24, 24);
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { TopView_ToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(154, 26);
+            contextMenuStrip1.Size = new Size(205, 36);
             contextMenuStrip1.MouseDown += MouseDown;
             // 
             // TopView_ToolStripMenuItem
             // 
             TopView_ToolStripMenuItem.Name = "TopView_ToolStripMenuItem";
-            TopView_ToolStripMenuItem.Size = new Size(153, 22);
+            TopView_ToolStripMenuItem.Size = new Size(204, 32);
             TopView_ToolStripMenuItem.Text = "常にトップに表示";
             TopView_ToolStripMenuItem.Click += TopView_ToolStripMenuItem_Click;
             TopView_ToolStripMenuItem.MouseDown += MouseDown;
@@ -127,17 +136,18 @@
             // 
             captureComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             captureComboBox.FormattingEnabled = true;
-            captureComboBox.Location = new Point(34, 4);
+            captureComboBox.Location = new Point(49, 12);
+            captureComboBox.Margin = new Padding(4, 5, 4, 5);
             captureComboBox.Name = "captureComboBox";
-            captureComboBox.Size = new Size(253, 23);
+            captureComboBox.Size = new Size(360, 33);
             captureComboBox.TabIndex = 8;
             captureComboBox.SelectedIndexChanged += captureComboBox_SelectedIndexChanged;
             // 
             // AudioLevelForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(299, 112);
+            ClientSize = new Size(427, 187);
             Controls.Add(captureComboBox);
             Controls.Add(renderComboBox);
             Controls.Add(pictureBox2);
@@ -147,6 +157,7 @@
             Controls.Add(renderLabel2);
             Controls.Add(captureLabel1);
             FormBorderStyle = FormBorderStyle.FixedDialog;
+            Margin = new Padding(4, 5, 4, 5);
             MaximizeBox = false;
             MdiChildrenMinimizedAnchorBottom = false;
             MinimizeBox = false;
