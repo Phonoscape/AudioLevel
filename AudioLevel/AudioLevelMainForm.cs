@@ -37,41 +37,7 @@ namespace AudioLevel
             SetRenderComboBox();
 
             client = new MMNotificationClient();
-            client.DefaultDeviceChanged += (s, a) =>
-            {
-                Debug.WriteLine($"Default Device Changed: {a.flow}, {a.role}, {a.defaultDeviceId}");
-
-                if (a.flow == DataFlow.Capture)
-                {
-                    if (capture_capture_in != null)
-                    {
-                        isCaptureChangeByAuto = true;
-                        StopCapture();
-
-                        SetDefaultAudioEndpointCapture();
-                        SetCapture();
-                        StartCapture();
-
-                        SetCaptureLabel(mMDevice_in.FriendlyName);
-                        SetCaptureBar(0);
-                    }
-                }
-                else if (a.flow == DataFlow.Render)
-                {
-                    if (capture_render_out != null)
-                    {
-                        isRenderChangeByAuto = true;
-                        StopRender();
-
-                        SetDefaultAudioEndpointRender();
-                        SetRender();
-                        StartRender();
-
-                        SetRenderLabel(mMDevice_out.FriendlyName);
-                        SetRenderBar(0);
-                    }
-                }
-            };
+            client.DefaultDeviceChanged += DefaultDeviceChanged;
 
             enumerator.RegisterEndpointNotificationCallback(client);
 
@@ -84,6 +50,42 @@ namespace AudioLevel
             StartRender();
 
             isInit = false;
+        }
+
+        private void DefaultDeviceChanged(object? sender, DefaultDeviceChangedEventArgs e)
+        {
+            Debug.WriteLine($"Default Device Changed: {e.flow}, {e.role}, {e.defaultDeviceId}");
+
+            if (e.flow == DataFlow.Capture)
+            {
+                if (capture_capture_in != null)
+                {
+                    isCaptureChangeByAuto = true;
+                    StopCapture();
+
+                    SetDefaultAudioEndpointCapture();
+                    SetCapture();
+                    StartCapture();
+
+                    SetCaptureLabel(mMDevice_in.FriendlyName);
+                    SetCaptureBar(0);
+                }
+            }
+            else if (e.flow == DataFlow.Render)
+            {
+                if (capture_render_out != null)
+                {
+                    isRenderChangeByAuto = true;
+                    StopRender();
+
+                    SetDefaultAudioEndpointRender();
+                    SetRender();
+                    StartRender();
+
+                    SetRenderLabel(mMDevice_out.FriendlyName);
+                    SetRenderBar(0);
+                }
+            }
         }
 
         private void SetDefaultAudioEndpointCapture()
@@ -149,36 +151,38 @@ namespace AudioLevel
             {
                 capture_capture_in = new WasapiCapture(mMDevice_in);
 
-                capture_capture_in.DataAvailable += (s, a) =>
-                {
-                    Debug.WriteLine($"Capture Bytes Recorded: {a.BytesRecorded}");
-
-                    if (a.BytesRecorded != 0)
-                    {
-                        var buffer = new float[a.BytesRecorded / sizeof(float)];
-                        Buffer.BlockCopy(a.Buffer, 0, buffer, 0, a.BytesRecorded);
-                        var max = buffer.Max();
-                        var level = (int)(max * 100); // Convert to percentage
-                        SetCaptureBar(level);
-                    }
-                };
-
-                capture_capture_in.RecordingStopped += (s, a) =>
-                {
-                    if (a.Exception != null)
-                    {
-                        MessageBox.Show($"Capture stopped with error: {a.Exception.Message}");
-                    }
-                    else
-                    {
-                        DisposeCapture();
-                    }
-                };
+                capture_capture_in.DataAvailable += CaptureDataAvailable;
+                capture_capture_in.RecordingStopped += CaptureRecoringStopped;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message); // Fixed: Use MessageBox.Show instead of MessageBox
                 return;
+            }
+        }
+
+        private void CaptureDataAvailable(object? sender, WaveInEventArgs e)
+        {
+            Debug.WriteLine($"Capture Bytes Recorded: {e.BytesRecorded}");
+            if (e.BytesRecorded != 0)
+            {
+                var buffer = new float[e.BytesRecorded / sizeof(float)];
+                Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
+                var max = buffer.Max();
+                var level = (int)(max * 100); // Convert to percentage
+                SetCaptureBar(level);
+            }
+        }
+
+        private void CaptureRecoringStopped(object? sender, StoppedEventArgs e)
+        {
+            if (e.Exception != null)
+            {
+                MessageBox.Show($"Capture stopped with error: {e.Exception.Message}");
+            }
+            else
+            {
+                DisposeCapture();
             }
         }
 
@@ -188,37 +192,38 @@ namespace AudioLevel
             {
                 capture_render_out = new WasapiLoopbackCapture(mMDevice_out);
 
-                capture_render_out.DataAvailable += (s, a) =>
-                {
-
-                    Debug.WriteLine($"Render Bytes Recorded: {a.BytesRecorded}");
-
-                    if (a.BytesRecorded != 0)
-                    {
-                        var buffer = new float[a.BytesRecorded / sizeof(float)];
-                        Buffer.BlockCopy(a.Buffer, 0, buffer, 0, a.BytesRecorded);
-                        var max = buffer.Max();
-                        var level = (int)(max * 100); // Convert to percentage
-                        SetRenderBar(level);
-                    }
-                };
-
-                capture_render_out.RecordingStopped += (s, a) =>
-                {
-                    if (a.Exception != null)
-                    {
-                        MessageBox.Show($"Render stopped with error: {a.Exception.Message}");
-                    }
-                    else
-                    {
-                        DisposeRender();
-                    }
-                };
+                capture_render_out.DataAvailable += RenderDataAvailable;
+                capture_render_out.RecordingStopped += RenderRecoringStopped;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message); // Fixed: Use MessageBox.Show instead of MessageBox
                 return;
+            }
+        }
+
+        private void RenderDataAvailable(object? sender, WaveInEventArgs e)
+        {
+            Debug.WriteLine($"Render Bytes Recorded: {e.BytesRecorded}");
+            if (e.BytesRecorded != 0)
+            {
+                var buffer = new float[e.BytesRecorded / sizeof(float)];
+                Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
+                var max = buffer.Max();
+                var level = (int)(max * 100); // Convert to percentage
+                SetRenderBar(level);
+            }
+        }
+
+        private void RenderRecoringStopped(object? sender, StoppedEventArgs e)
+        {
+            if (e.Exception != null)
+            {
+                MessageBox.Show($"Render stopped with error: {e.Exception.Message}");
+            }
+            else
+            {
+                DisposeRender();
             }
         }
 
@@ -258,6 +263,8 @@ namespace AudioLevel
         {
             if (capture_capture_in != null)
             {
+                capture_capture_in.DataAvailable -= CaptureDataAvailable;
+                capture_capture_in.RecordingStopped -= CaptureRecoringStopped;
                 capture_capture_in.Dispose();
                 capture_capture_in = null;
             }
@@ -267,6 +274,8 @@ namespace AudioLevel
         {
             if (capture_render_out != null)
             {
+                capture_render_out.DataAvailable -= RenderDataAvailable;
+                capture_render_out.RecordingStopped -= RenderRecoringStopped;
                 capture_render_out.Dispose();
                 capture_render_out = null;
             }
@@ -359,6 +368,7 @@ namespace AudioLevel
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             enumerator.UnregisterEndpointNotificationCallback(client);
+            client.DefaultDeviceChanged -= DefaultDeviceChanged;
 
             StopCapture();
             StopRender();
