@@ -163,7 +163,6 @@ namespace AudioLevel
                     }
                 };
 
-                /*
                 capture_capture_in.RecordingStopped += (s, a) =>
                 {
                     if (a.Exception != null)
@@ -173,10 +172,8 @@ namespace AudioLevel
                     else
                     {
                         DisposeCapture();
-                        capture_capture_in = null;
                     }
                 };
-                */
             }
             catch (Exception ex)
             {
@@ -205,7 +202,7 @@ namespace AudioLevel
                         SetRenderBar(level);
                     }
                 };
-                /*
+
                 capture_render_out.RecordingStopped += (s, a) =>
                 {
                     if (a.Exception != null)
@@ -215,10 +212,8 @@ namespace AudioLevel
                     else
                     {
                         DisposeRender();
-                        capture_render_out = null;
                     }
                 };
-                */
             }
             catch (Exception ex)
             {
@@ -259,6 +254,23 @@ namespace AudioLevel
             }
         }
 
+        private void DisposeCapture()
+        {
+            if (capture_capture_in != null)
+            {
+                capture_capture_in.Dispose();
+                capture_capture_in = null;
+            }
+        }
+
+        private void DisposeRender()
+        {
+            if (capture_render_out != null)
+            {
+                capture_render_out.Dispose();
+                capture_render_out = null;
+            }
+        }
 
         private void SetCaptureLabel(string str)
         {
@@ -432,7 +444,6 @@ namespace AudioLevel
                     string selectedDevice = captureComboBox.SelectedItem.ToString();
                     Debug.WriteLine($"Selected Capture Device: {selectedDevice}");
                     StopCapture();
-
                     SetAudioEndpointCapture(mMDeviceCollection_in_ids[captureComboBox.SelectedIndex]);
                     SetCapture();
                     StartCapture();
@@ -452,7 +463,6 @@ namespace AudioLevel
                     string selectedDevice = renderComboBox.SelectedItem.ToString();
                     Debug.WriteLine($"Selected Render Device: {selectedDevice}");
                     StopRender();
-
                     SetAudioEndpointRender(mMDeviceCollection_out_ids[renderComboBox.SelectedIndex]);
                     SetRender();
                     StartRender();
