@@ -19,6 +19,9 @@ namespace AudioLevel
         private MMDeviceCollection mMDeviceCollection_out;
         private List<string> mMDeviceCollection_in_ids = new List<string>();
         private List<string> mMDeviceCollection_out_ids = new List<string>();
+        private string mMDevice_in_id_next = string.Empty;
+        private string mMDevice_out_id_next = string.Empty;
+
 
         private bool isCaptureChangeByAuto = false;
         private bool isRenderChangeByAuto = false;
@@ -43,6 +46,10 @@ namespace AudioLevel
 
             SetDefaultAudioEndpointCapture();
             SetDefaultAudioEndpointRender();
+
+            SetAudioEndpointCapture(mMDevice_in_id_next);
+            SetAudioEndpointRender(mMDevice_out_id_next);
+
             SetCapture();
             SetRender();
 
@@ -61,14 +68,8 @@ namespace AudioLevel
                 if (capture_capture_in != null)
                 {
                     isCaptureChangeByAuto = true;
-                    StopCapture();
-
                     SetDefaultAudioEndpointCapture();
-                    SetCapture();
-                    StartCapture();
-
-                    SetCaptureLabel(mMDevice_in.FriendlyName);
-                    SetCaptureBar(0);
+                    StopCapture();
                 }
             }
             else if (e.flow == DataFlow.Render)
@@ -76,14 +77,8 @@ namespace AudioLevel
                 if (capture_render_out != null)
                 {
                     isRenderChangeByAuto = true;
-                    StopRender();
-
                     SetDefaultAudioEndpointRender();
-                    SetRender();
-                    StartRender();
-
-                    SetRenderLabel(mMDevice_out.FriendlyName);
-                    SetRenderBar(0);
+                    StopRender();
                 }
             }
         }
@@ -93,7 +88,8 @@ namespace AudioLevel
             try
             {
                 mMDevice_in = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
-                SetCaptureLabel(mMDevice_in.FriendlyName);
+             
+                mMDevice_in_id_next = mMDevice_in.ID; // Store the ID for future use
             }
             catch (Exception ex)
             {
@@ -107,7 +103,8 @@ namespace AudioLevel
             try
             {
                 mMDevice_out = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Communications);
-                SetRenderLabel(mMDevice_out.FriendlyName);
+
+                mMDevice_out_id_next = mMDevice_out.ID; // Store the ID for future use
             }
             catch (Exception ex)
             {
@@ -183,6 +180,15 @@ namespace AudioLevel
             else
             {
                 DisposeCapture();
+
+                if (mMDevice_in_id_next != string.Empty)
+                {
+                    SetAudioEndpointCapture(mMDevice_in_id_next);
+                    SetCapture();
+                    StartCapture();
+                    SetCaptureLabel(mMDevice_in.FriendlyName);
+                    SetCaptureBar(0);
+                }
             }
         }
 
@@ -224,6 +230,15 @@ namespace AudioLevel
             else
             {
                 DisposeRender();
+
+                if (mMDevice_out_id_next != string.Empty)
+                {
+                    SetAudioEndpointRender(mMDevice_out_id_next);
+                    SetRender();
+                    StartRender();
+                    SetRenderLabel(mMDevice_out.FriendlyName);
+                    SetRenderBar(0);
+                }
             }
         }
 
@@ -453,12 +468,9 @@ namespace AudioLevel
                 {
                     string selectedDevice = captureComboBox.SelectedItem.ToString();
                     Debug.WriteLine($"Selected Capture Device: {selectedDevice}");
+                    mMDevice_in_id_next = mMDeviceCollection_in_ids[captureComboBox.SelectedIndex];
+                    SetAudioEndpointCapture(mMDevice_in_id_next);
                     StopCapture();
-                    SetAudioEndpointCapture(mMDeviceCollection_in_ids[captureComboBox.SelectedIndex]);
-                    SetCapture();
-                    StartCapture();
-                    SetCaptureLabel(mMDevice_in.FriendlyName);
-                    SetCaptureBar(0);
                 }
             }
             isCaptureChangeByAuto = false;
@@ -472,12 +484,9 @@ namespace AudioLevel
                 {
                     string selectedDevice = renderComboBox.SelectedItem.ToString();
                     Debug.WriteLine($"Selected Render Device: {selectedDevice}");
+                    mMDevice_out_id_next = mMDeviceCollection_out_ids[renderComboBox.SelectedIndex];
+                    SetAudioEndpointRender(mMDevice_out_id_next);
                     StopRender();
-                    SetAudioEndpointRender(mMDeviceCollection_out_ids[renderComboBox.SelectedIndex]);
-                    SetRender();
-                    StartRender();
-                    SetRenderLabel(mMDevice_out.FriendlyName);
-                    SetRenderBar(0);
                 }
             }
             isRenderChangeByAuto = false;
