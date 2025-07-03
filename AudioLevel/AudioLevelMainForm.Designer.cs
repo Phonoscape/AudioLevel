@@ -31,8 +31,8 @@
             components = new System.ComponentModel.Container();
             captureLabel1 = new Label();
             renderLabel2 = new Label();
-            progressBar1 = new ProgressBar();
-            progressBar2 = new ProgressBar();
+            cap_level_L_ProgressBar = new ProgressBar();
+            ren_level_L_ProgressBar = new ProgressBar();
             pictureBox1 = new PictureBox();
             pictureBox2 = new PictureBox();
             renderComboBox = new ComboBox();
@@ -40,6 +40,8 @@
             TopView_ToolStripMenuItem = new ToolStripMenuItem();
             captureComboBox = new ComboBox();
             mute_CheckBox = new CheckBox();
+            cap_level_R_ProgressBar = new ProgressBar();
+            ren_level_R_ProgressBar = new ProgressBar();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             contextMenuStrip1.SuspendLayout();
@@ -67,23 +69,23 @@
             renderLabel2.Text = "Output";
             renderLabel2.MouseDown += MouseDown;
             // 
-            // progressBar1
+            // cap_level_L_ProgressBar
             // 
-            progressBar1.Location = new Point(17, 50);
-            progressBar1.Margin = new Padding(4, 5, 4, 5);
-            progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(433, 38);
-            progressBar1.TabIndex = 4;
-            progressBar1.MouseDown += MouseDown;
+            cap_level_L_ProgressBar.Location = new Point(17, 50);
+            cap_level_L_ProgressBar.Margin = new Padding(4, 5, 4, 5);
+            cap_level_L_ProgressBar.Name = "cap_level_L_ProgressBar";
+            cap_level_L_ProgressBar.Size = new Size(433, 18);
+            cap_level_L_ProgressBar.TabIndex = 4;
+            cap_level_L_ProgressBar.MouseDown += MouseDown;
             // 
-            // progressBar2
+            // ren_level_L_ProgressBar
             // 
-            progressBar2.Location = new Point(17, 138);
-            progressBar2.Margin = new Padding(4, 5, 4, 5);
-            progressBar2.Name = "progressBar2";
-            progressBar2.Size = new Size(433, 38);
-            progressBar2.TabIndex = 4;
-            progressBar2.MouseDown += MouseDown;
+            ren_level_L_ProgressBar.Location = new Point(17, 138);
+            ren_level_L_ProgressBar.Margin = new Padding(4, 5, 4, 5);
+            ren_level_L_ProgressBar.Name = "ren_level_L_ProgressBar";
+            ren_level_L_ProgressBar.Size = new Size(433, 18);
+            ren_level_L_ProgressBar.TabIndex = 4;
+            ren_level_L_ProgressBar.MouseDown += MouseDown;
             // 
             // pictureBox1
             // 
@@ -155,18 +157,36 @@
             mute_CheckBox.UseVisualStyleBackColor = true;
             mute_CheckBox.Click += mute_CheckBox_Click;
             // 
+            // cap_level_R_ProgressBar
+            // 
+            cap_level_R_ProgressBar.Location = new Point(17, 74);
+            cap_level_R_ProgressBar.Margin = new Padding(4, 5, 4, 5);
+            cap_level_R_ProgressBar.Name = "cap_level_R_ProgressBar";
+            cap_level_R_ProgressBar.Size = new Size(433, 18);
+            cap_level_R_ProgressBar.TabIndex = 10;
+            // 
+            // ren_level_R_ProgressBar
+            // 
+            ren_level_R_ProgressBar.Location = new Point(17, 162);
+            ren_level_R_ProgressBar.Margin = new Padding(4, 5, 4, 5);
+            ren_level_R_ProgressBar.Name = "ren_level_R_ProgressBar";
+            ren_level_R_ProgressBar.Size = new Size(433, 18);
+            ren_level_R_ProgressBar.TabIndex = 11;
+            // 
             // AudioLevelForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(466, 187);
+            ClientSize = new Size(466, 194);
+            Controls.Add(ren_level_R_ProgressBar);
+            Controls.Add(cap_level_R_ProgressBar);
             Controls.Add(mute_CheckBox);
             Controls.Add(captureComboBox);
             Controls.Add(renderComboBox);
             Controls.Add(pictureBox2);
             Controls.Add(pictureBox1);
-            Controls.Add(progressBar2);
-            Controls.Add(progressBar1);
+            Controls.Add(ren_level_L_ProgressBar);
+            Controls.Add(cap_level_L_ProgressBar);
             Controls.Add(renderLabel2);
             Controls.Add(captureLabel1);
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -188,8 +208,8 @@
         #endregion
         private Label captureLabel1;
         private Label renderLabel2;
-        private ProgressBar progressBar1;
-        private ProgressBar progressBar2;
+        private ProgressBar cap_level_L_ProgressBar;
+        private ProgressBar ren_level_L_ProgressBar;
         private PictureBox pictureBox1;
         private PictureBox pictureBox2;
         private ComboBox renderComboBox;
@@ -197,5 +217,7 @@
         private ToolStripMenuItem TopView_ToolStripMenuItem;
         private ComboBox captureComboBox;
         private CheckBox mute_CheckBox;
+        private ProgressBar cap_level_R_ProgressBar;
+        private ProgressBar ren_level_R_ProgressBar;
     }
 }

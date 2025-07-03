@@ -1,6 +1,7 @@
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using NAudio.Wave;
+using System;
 using System.Data;
 using System.Diagnostics;
 
@@ -163,11 +164,40 @@ namespace AudioLevel
             Debug.WriteLine($"Capture Bytes Recorded: {e.BytesRecorded}");
             if (e.BytesRecorded != 0)
             {
-                var buffer = new float[e.BytesRecorded / sizeof(float)];
-                Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
-                var max = buffer.Max();
-                var level = (int)(max * 100); // Convert to percentage
-                SetCaptureBar(level);
+                if (capture_capture_in.WaveFormat.Channels == 1)
+                {
+                    var samplePerByte = capture_capture_in.WaveFormat.BitsPerSample / 8;
+                    // Mono channel, process directly
+                    var buffer = new float[e.BytesRecorded / samplePerByte];
+                    Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
+                    var max = buffer.Max();
+                    var level = (int)(max * 100); // Convert to percentage
+                    SetCaptureBar_L(level);
+                    SetCaptureBar_R(level);
+                }
+                else if (capture_capture_in.WaveFormat.Channels == 2)
+                {
+                    var samplePerByte = capture_capture_in.WaveFormat.BitsPerSample / 8;
+                    // Stereo channel, process both channels
+                    var buffer_l = new float[e.BytesRecorded / samplePerByte / 2];
+                    var buffer_r = new float[e.BytesRecorded / samplePerByte / 2];
+                    for (int i = 0; i < buffer_l.Length; i++)
+                    {
+                        Buffer.BlockCopy(e.Buffer, (i * 2) * samplePerByte, buffer_l, i * samplePerByte, samplePerByte);
+                        Buffer.BlockCopy(e.Buffer, (i * 2 + 1) * samplePerByte, buffer_r, i * samplePerByte, samplePerByte);
+                    }
+                    var max_l = buffer_l.Max();
+                    var max_r = buffer_r.Max();
+                    var level_l = (int)(max_l * 100); // Convert to percentage
+                    var level_r = (int)(max_r * 100); // Convert to percentage
+                    SetCaptureBar_L(level_l);
+                    SetCaptureBar_R(level_r);
+                }
+                else
+                {
+                    Debug.WriteLine($"Unsupported channel count: {capture_capture_in.WaveFormat.Channels}");
+                    return;
+                }
             }
         }
 
@@ -187,7 +217,8 @@ namespace AudioLevel
                     SetCapture();
                     StartCapture();
                     SetCaptureLabel(mMDevice_in.FriendlyName);
-                    SetCaptureBar(0);
+                    SetCaptureBar_L(0);
+                    SetCaptureBar_R(0);
                 }
             }
         }
@@ -213,11 +244,38 @@ namespace AudioLevel
             Debug.WriteLine($"Render Bytes Recorded: {e.BytesRecorded}");
             if (e.BytesRecorded != 0)
             {
-                var buffer = new float[e.BytesRecorded / sizeof(float)];
-                Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
-                var max = buffer.Max();
-                var level = (int)(max * 100); // Convert to percentage
-                SetRenderBar(level);
+                if (capture_render_out.WaveFormat.Channels == 1)
+                {
+                    var buffer = new float[e.BytesRecorded / sizeof(float)];
+                    Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
+                    var max = buffer.Max();
+                    var level = (int)(max * 100); // Convert to percentage
+                    SetRenderBar_L(level);
+                    SetRenderBar_R(level);
+                }
+                else if (capture_render_out.WaveFormat.Channels == 2)
+                {
+                    var samplePerByte = capture_render_out.WaveFormat.BitsPerSample / 8;
+                    // Stereo channel, process both channels
+                    var buffer_l = new float[e.BytesRecorded / samplePerByte / 2];
+                    var buffer_r = new float[e.BytesRecorded / samplePerByte / 2];
+                    for (int i = 0; i < buffer_l.Length; i++)
+                    {
+                        Buffer.BlockCopy(e.Buffer, (i * 2) * samplePerByte, buffer_l, i * samplePerByte, samplePerByte);
+                        Buffer.BlockCopy(e.Buffer, (i * 2 + 1) * samplePerByte, buffer_r, i * samplePerByte, samplePerByte);
+                    }
+                    var max_l = buffer_l.Max();
+                    var max_r = buffer_r.Max();
+                    var level_l = (int)(max_l * 100); // Convert to percentage
+                    var level_r = (int)(max_r * 100); // Convert to percentage
+                    SetRenderBar_L(level_l);
+                    SetRenderBar_R(level_r);
+                }
+                else
+                {
+                    Debug.WriteLine($"Unsupported channel count: {capture_capture_in.WaveFormat.Channels}");
+                    return;
+                }
             }
         }
 
@@ -237,7 +295,8 @@ namespace AudioLevel
                     SetRender();
                     StartRender();
                     SetRenderLabel(mMDevice_out.FriendlyName);
-                    SetRenderBar(0);
+                    SetRenderBar_L(0);
+                    SetRenderBar_R(0);
                 }
             }
         }
@@ -350,33 +409,63 @@ namespace AudioLevel
             }
         }
 
-        private void SetCaptureBar(int level)
+        private void SetCaptureBar_L(int level)
         {
-            if (progressBar1.InvokeRequired)
+            if (cap_level_L_ProgressBar.InvokeRequired)
             {
-                progressBar1.Invoke(new Action(() =>
+                cap_level_L_ProgressBar.Invoke(new Action(() =>
                 {
-                    progressBar1.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
+                    cap_level_L_ProgressBar.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
                 }));
             }
             else
             {
-                progressBar1.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
+                cap_level_L_ProgressBar.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
             }
         }
 
-        private void SetRenderBar(int level)
-        {
-            if (progressBar2.InvokeRequired)
+         private void SetCaptureBar_R(int level)
+         {
+            if (cap_level_R_ProgressBar.InvokeRequired)
             {
-                progressBar2.Invoke(new Action(() =>
+                cap_level_R_ProgressBar.Invoke(new Action(() =>
                 {
-                    progressBar2.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
+                    cap_level_R_ProgressBar.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
                 }));
             }
             else
             {
-                progressBar2.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
+                cap_level_R_ProgressBar.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
+            }
+        }
+
+        private void SetRenderBar_L(int level)
+        {
+            if (ren_level_L_ProgressBar.InvokeRequired)
+            {
+                ren_level_L_ProgressBar.Invoke(new Action(() =>
+                {
+                    ren_level_L_ProgressBar.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
+                }));
+            }
+            else
+            {
+                ren_level_L_ProgressBar.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
+            }
+        }
+
+        private void SetRenderBar_R(int level)
+        {
+            if (ren_level_R_ProgressBar.InvokeRequired)
+            {
+                ren_level_R_ProgressBar.Invoke(new Action(() =>
+                {
+                    ren_level_R_ProgressBar.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
+                }));
+            }
+            else
+            {
+                ren_level_R_ProgressBar.Value = Math.Min(level, 100); // Ensure it doesn't exceed 100%
             }
         }
 
