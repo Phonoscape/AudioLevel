@@ -23,10 +23,12 @@ namespace AudioLevel
         private bool isCaptureChangeByAuto = false;
         private bool isRenderChangeByAuto = false;
         private bool isInit = true;
+        private bool isMute = false;
 
         public AudioLevelForm()
         {
             InitializeComponent();
+            mute_CheckBox.Checked = isMute;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -498,6 +500,18 @@ namespace AudioLevel
             public void OnPropertyValueChanged(string pwstrDeviceId, PropertyKey key)
             {
             }
+        }
+
+        private void mute_CheckBox_Click(object sender, EventArgs e)
+        {
+            isMute = !isMute;
+            mute_CheckBox.Checked = isMute;
+
+            if (mMDevice_in != null)
+            {
+                mMDevice_in.AudioEndpointVolume.Mute = isMute;
+            }
+
         }
     }
 }

@@ -39,6 +39,7 @@
             contextMenuStrip1 = new ContextMenuStrip(components);
             TopView_ToolStripMenuItem = new ToolStripMenuItem();
             captureComboBox = new ComboBox();
+            mute_CheckBox = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             contextMenuStrip1.SuspendLayout();
@@ -71,7 +72,7 @@
             progressBar1.Location = new Point(17, 50);
             progressBar1.Margin = new Padding(4, 5, 4, 5);
             progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(393, 38);
+            progressBar1.Size = new Size(433, 38);
             progressBar1.TabIndex = 4;
             progressBar1.MouseDown += MouseDown;
             // 
@@ -80,7 +81,7 @@
             progressBar2.Location = new Point(17, 138);
             progressBar2.Margin = new Padding(4, 5, 4, 5);
             progressBar2.Name = "progressBar2";
-            progressBar2.Size = new Size(393, 38);
+            progressBar2.Size = new Size(433, 38);
             progressBar2.TabIndex = 4;
             progressBar2.MouseDown += MouseDown;
             // 
@@ -111,7 +112,7 @@
             renderComboBox.Location = new Point(49, 100);
             renderComboBox.Margin = new Padding(4, 5, 4, 5);
             renderComboBox.Name = "renderComboBox";
-            renderComboBox.Size = new Size(360, 33);
+            renderComboBox.Size = new Size(401, 33);
             renderComboBox.TabIndex = 7;
             renderComboBox.SelectedIndexChanged += renderComboBox_SelectedIndexChanged;
             renderComboBox.MouseDown += MouseDown;
@@ -143,11 +144,23 @@
             captureComboBox.TabIndex = 8;
             captureComboBox.SelectedIndexChanged += captureComboBox_SelectedIndexChanged;
             // 
+            // mute_CheckBox
+            // 
+            mute_CheckBox.Appearance = Appearance.Button;
+            mute_CheckBox.Location = new Point(416, 12);
+            mute_CheckBox.Name = "mute_CheckBox";
+            mute_CheckBox.Size = new Size(34, 30);
+            mute_CheckBox.TabIndex = 9;
+            mute_CheckBox.Text = "M";
+            mute_CheckBox.UseVisualStyleBackColor = true;
+            mute_CheckBox.Click += mute_CheckBox_Click;
+            // 
             // AudioLevelForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(427, 187);
+            ClientSize = new Size(466, 187);
+            Controls.Add(mute_CheckBox);
             Controls.Add(captureComboBox);
             Controls.Add(renderComboBox);
             Controls.Add(pictureBox2);
@@ -183,5 +196,6 @@
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem TopView_ToolStripMenuItem;
         private ComboBox captureComboBox;
+        private CheckBox mute_CheckBox;
     }
 }
