@@ -1,9 +1,9 @@
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using NAudio.Wave;
-using System;
-using System.Data;
+using System.Configuration;
 using System.Diagnostics;
+using ConfigurationManager = System.Configuration.ConfigurationManager;
 
 namespace AudioLevel
 {
@@ -56,6 +56,8 @@ namespace AudioLevel
 
             StartCapture();
             StartRender();
+
+            ReadConfig();
 
             isInit = false;
         }
@@ -476,6 +478,8 @@ namespace AudioLevel
 
             StopCapture();
             StopRender();
+
+            WriteConfig();
         }
 
         private new void MouseDown(object sender, MouseEventArgs e)
@@ -630,6 +634,36 @@ namespace AudioLevel
                 mMDevice_in.AudioEndpointVolume.Mute = isMute;
             }
 
+        }
+
+        private void ReadConfig()
+        {
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None); // Fixed: Specify ConfigurationUserLevel.None to resolve CS1501
+
+            if (config.AppSettings.Settings["Top"] != null)
+            {
+                this.Top = int.Parse(config.AppSettings.Settings["Top"].Value);
+            }
+
+            if (config.AppSettings.Settings["Left"] != null)
+            {
+                this.Left = int.Parse(config.AppSettings.Settings["Left"].Value);
+            }
+
+            if (config.AppSettings.Settings["TopMost"] != null)
+            {
+                this.TopMost = bool.Parse(config.AppSettings.Settings["TopMost"].Value);
+            }
+        }
+
+        private void WriteConfig()
+        {
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None); // Fixed: Specify ConfigurationUserLevel.None to resolve CS1501
+
+            config.AppSettings.Settings.Add("Top", this.Top.ToString());
+            config.AppSettings.Settings.Add("Left", this.Left.ToString());
+            config.AppSettings.Settings.Add("TopMost", this.TopMost.ToString());
+            config.Save(ConfigurationSaveMode.Minimal);
         }
     }
 }
