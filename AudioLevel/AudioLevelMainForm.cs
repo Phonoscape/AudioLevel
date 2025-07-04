@@ -642,17 +642,38 @@ namespace AudioLevel
 
             if (config.AppSettings.Settings["Top"] != null)
             {
-                this.Top = int.Parse(config.AppSettings.Settings["Top"].Value);
+                try
+                { 
+                    this.Top = int.Parse(config.AppSettings.Settings["Top"].Value);
+                }
+                catch (Exception)
+                {
+                    Debug.WriteLine("Error parsing Top value from config, using default.");
+                }
             }
 
             if (config.AppSettings.Settings["Left"] != null)
             {
-                this.Left = int.Parse(config.AppSettings.Settings["Left"].Value);
+                try
+                {                     
+                    this.Left = int.Parse(config.AppSettings.Settings["Left"].Value);
+                }
+                catch (Exception)
+                {
+                    Debug.WriteLine("Error parsing Left value from config, using default.");
+                }
             }
 
             if (config.AppSettings.Settings["TopMost"] != null)
             {
-                this.TopMost = bool.Parse(config.AppSettings.Settings["TopMost"].Value);
+                try
+                { 
+                    this.TopMost = bool.Parse(config.AppSettings.Settings["TopMost"].Value);
+                }
+                catch (Exception)
+                {
+                    Debug.WriteLine("Error parsing TopMost value from config, using default.");
+                }
             }
         }
 
@@ -660,6 +681,7 @@ namespace AudioLevel
         {
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None); // Fixed: Specify ConfigurationUserLevel.None to resolve CS1501
 
+            config.AppSettings.Settings.Clear();
             config.AppSettings.Settings.Add("Top", this.Top.ToString());
             config.AppSettings.Settings.Add("Left", this.Left.ToString());
             config.AppSettings.Settings.Add("TopMost", this.TopMost.ToString());
